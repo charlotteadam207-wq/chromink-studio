@@ -4,7 +4,7 @@
   Kenya example: 254712345678 (no +, spaces, or leading 0).
   Do not publish a real number without the owner's permission.
 */
-const WHATSAPP_NUMBER = "2547XXXXXXXX";
+const WHATSAPP_NUMBER = "254752712890";
 const PROMOTION_END_DATE = ""; // Optional: "2026-12-31". Leave blank if no end date is confirmed.
 
 const menuToggle = document.querySelector(".menu-toggle");
