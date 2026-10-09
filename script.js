@@ -1,91 +1,43 @@
-/*
-  CHROMINK STUDIO CONFIGURATION
-  Replace the placeholder with the studio's WhatsApp number in international format:
-  Kenya example: 254712345678 (no +, spaces, or leading 0).
-  Do not publish a real number without the owner's permission.
-*/
+// CUSTOMIZE THESE SETTINGS
+// WhatsApp expects country code + number, digits only.
+// 0752712890 is configured as Kenya: 254752712890.
 const WHATSAPP_NUMBER = "254752712890";
-const PROMOTION_END_DATE = ""; // Optional: "2026-12-31". Leave blank if no end date is confirmed.
+const PROMOTION_START = "5 October 2026";
+const PROMOTION_END = "30 October 2026";
+const DISCOUNT_PERCENT = 20;
 
-const menuToggle = document.querySelector(".menu-toggle");
-const mainNav = document.querySelector("#mainNav");
+// Edit service names, descriptions and original USD prices here.
+const SERVICES = [
+ {name:"Fine line",description:"Delicate linework and subtle, personal designs.",price:100,icon:"✳"},
+ {name:"Custom tattoo",description:"A one-of-a-kind concept built around your story.",price:180,icon:"✦"},
+ {name:"Color piece",description:"Vivid color, contrast, and expressive energy.",price:220,icon:"◈"},
+ {name:"Large / session",description:"Bigger concepts and detailed multi-session work.",price:350,icon:"✺"}
+];
+const money = amount => new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",maximumFractionDigits:2}).format(amount);
+document.getElementById("serviceGrid").innerHTML = SERVICES.map((s,i) => `
+ <article class="service-card"><span class="service-index">0${i+1} / SERVICE</span><span class="service-icon">${s.icon}</span>
+ <h3>${s.name}</h3><p>${s.description}</p><div class="price-row"><span class="old-price">${money(s.price)}</span><strong class="new-price">${money(s.price*(1-DISCOUNT_PERCENT/100))}</strong></div></article>`).join("");
 
-menuToggle.addEventListener("click", () => {
-  const open = mainNav.classList.toggle("open");
-  menuToggle.setAttribute("aria-expanded", String(open));
-  menuToggle.textContent = open ? "×" : "☰";
+const generalMessage = `Hello! I'd like to ask about tattoo services, availability, the ${DISCOUNT_PERCENT}% promotion (${PROMOTION_START} – ${PROMOTION_END}), and the $150 USD initial booking deposit. Please confirm deposit terms before I pay.`;
+function waLink(message){return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;}
+["quickWhatsApp","contactWhatsApp"].forEach(id=>{const a=document.getElementById(id);a.href=waLink(generalMessage);a.target="_blank";a.rel="noopener noreferrer";});
+document.getElementById("bookingForm").addEventListener("submit",e=>{
+ e.preventDefault();if(!e.currentTarget.reportValidity())return;
+ const name=document.getElementById("name").value.trim(),date=document.getElementById("date").value,
+ style=document.getElementById("style").value,size=document.getElementById("size").value,
+ description=document.getElementById("description").value.trim();
+ const message=[
+ "Hello! I'd like to request a tattoo appointment.","",
+ `Name: ${name}`,`Preferred date: ${date}`,`Tattoo style: ${style}`,`Approximate size: ${size}`,`Design description: ${description}`,"",
+ `I saw the ${DISCOUNT_PERCENT}% promotion (${PROMOTION_START} – ${PROMOTION_END}).`,
+ "I understand the initial booking deposit is listed as $150 USD. Please confirm deposit terms and appointment availability before I pay.",
+ "Please let me know the next steps. Thank you!"
+ ].join("\n");
+ document.getElementById("formStatus").textContent="Opening WhatsApp with your appointment details…";
+ window.open(waLink(message),"_blank","noopener,noreferrer");
 });
-mainNav.querySelectorAll("a").forEach(link => link.addEventListener("click", () => {
-  mainNav.classList.remove("open");
-  menuToggle.setAttribute("aria-expanded", "false");
-  menuToggle.textContent = "☰";
-}));
-
-document.querySelector("#year").textContent = new Date().getFullYear();
-
-if (PROMOTION_END_DATE) {
-  const end = new Date(`${PROMOTION_END_DATE}T23:59:59`);
-  if (!Number.isNaN(end.getTime())) {
-    const strip = document.querySelector(".promo-strip");
-    const note = document.createElement("span");
-    note.textContent = `Offer ends ${end.toLocaleDateString(undefined, {year:"numeric", month:"short", day:"numeric"})}`;
-    strip.appendChild(note);
-  }
-}
-
-function whatsappUrl(message) {
-  const digits = WHATSAPP_NUMBER.replace(/\D/g, "");
-  if (!digits || digits.includes("XXXXXXXX") || digits.length < 8) return null;
-  return `https://wa.me/${digits}?text=${encodeURIComponent(message)}`;
-}
-
-document.querySelector("#floatingWhatsApp").addEventListener("click", event => {
-  event.preventDefault();
-  const url = whatsappUrl("Hello ChromInk Studio! I'd like to ask about booking a tattoo appointment, the 20% promotion, and the $150 USD initial deposit terms.");
-  if (!url) {
-    alert("Please configure WHATSAPP_NUMBER in script.js with the studio's WhatsApp number before using booking links.");
-    return;
-  }
-  window.open(url, "_blank", "noopener,noreferrer");
-});
-
-document.querySelectorAll(".style-chip").forEach(button => {
-  button.addEventListener("click", () => {
-    document.querySelector("#tattooStyle").value = button.dataset.style;
-    document.querySelector("#booking").scrollIntoView({behavior:"smooth"});
-  });
-});
-
-document.querySelector("#bookingForm").addEventListener("submit", event => {
-  event.preventDefault();
-  const form = event.currentTarget;
-  if (!form.reportValidity()) return;
-
-  const data = new FormData(form);
-  const name = String(data.get("customerName")).trim();
-  const date = String(data.get("customerDate"));
-  const style = String(data.get("tattooStyle"));
-  const size = String(data.get("tattooSize") || "Not sure");
-  const description = String(data.get("designDescription")).trim();
-
-  const message = [
-    "Hello ChromInk Studio! I'd like to request a tattoo appointment.",
-    "",
-    `Name: ${name}`,
-    `Preferred date: ${date}`,
-    `Tattoo style: ${style}`,
-    `Approximate size: ${size}`,
-    `Design idea: ${description}`,
-    "",
-    "Please confirm availability, the final quote, eligibility for the 20% discount, and the terms of the $150 USD initial deposit. I understand this is a request, not a confirmed booking."
-  ].join("\n");
-
-  const url = whatsappUrl(message);
-  const status = document.querySelector("#formMessage");
-  if (!url) {
-    status.textContent = "Setup needed: edit script.js and replace WHATSAPP_NUMBER with the studio's WhatsApp number in international format.";
-    return;
-  }
-  status.textContent = "WhatsApp is opening with your request. Review the message and press Send to contact the studio.";
-  window.open(url, "_blank", "noopener,noreferrer");
-});
+const date=document.getElementById("date"),now=new Date();date.min=new Date(now.getTime()-now.getTimezoneOffset()*60000).toISOString().slice(0,10);
+document.getElementById("year").textContent=new Date().getFullYear();
+const menu=document.querySelector(".menu"),nav=document.getElementById("nav");
+menu.addEventListener("click",()=>{const open=nav.classList.toggle("open");menu.setAttribute("aria-expanded",String(open));menu.setAttribute("aria-label",open?"Close navigation":"Toggle navigation");menu.textContent=open?"×":"☰";});
+nav.querySelectorAll("a").forEach(a=>a.addEventListener("click",()=>{nav.classList.remove("open");menu.setAttribute("aria-expanded","false");menu.textContent="☰";}));
