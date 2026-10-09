@@ -1,7 +1,7 @@
 // CUSTOMIZE THESE SETTINGS
 // WhatsApp expects country code + number, digits only.
 // 0752712890 is configured as Kenya: 254752712890.
-const WHATSAPP_NUMBER = "254752712890";
+const WHATSAPP_NUMBER = "+254752712890";
 const PROMOTION_START = "5 October 2026";
 const PROMOTION_END = "30 October 2026";
 const DISCOUNT_PERCENT = 20;
